@@ -3,8 +3,8 @@ package main
 type Strategy int
 const (
 	ALL Strategy = iota
-	SIMPLE_RANDOM Strategy = iota
 	CONVENIENCE Strategy = iota
+	SIMPLE_RANDOM Strategy = iota
 	STRATIFIED_ROW Strategy = iota
 	STRATIFIED_COL Strategy = iota
 )

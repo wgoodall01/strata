@@ -56,6 +56,9 @@ func main(){
 	realAvg := Sample(ALL)
 	writeRecord(writer, ALL, realAvg.Value())
 
+	convenienceAvg := Sample(CONVENIENCE)
+	writeRecord(writer, CONVENIENCE, convenienceAvg.Value())
+
 	for i := 0; i < *arg_iterations; i++ {
 		for strat := SIMPLE_RANDOM; strat <= STRATIFIED_COL; strat++ {
 			//Get sample avg
@@ -78,8 +81,8 @@ func main(){
 
 	msg("  --- Error Digest ---")
 	msg("Real          : %f avg", realAvg.Value())
+	msg("Convenience   : %f%% error", math.Abs(1 - convenienceAvg.Value() / realAvg.Value()) * 100)
 	msg("Simple random : %f%% error", errorAverages[SIMPLE_RANDOM].Value() * 100)
-	msg("Convenience   : %f%% error", errorAverages[CONVENIENCE].Value() * 100)
 	msg("Stratified row: %f%% error", errorAverages[STRATIFIED_ROW].Value() * 100)
 	msg("Stratified col: %f%% error", errorAverages[STRATIFIED_COL].Value() * 100)
 }
