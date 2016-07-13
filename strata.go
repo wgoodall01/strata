@@ -14,6 +14,8 @@ import (
 // Start up a RNG
 var Rng = rand.New(rand.NewSource(time.Now().UnixNano()));
 
+var outputting = false
+
 func main(){
 	// argv parsing to config
 	arg_iterations := kingpin.Flag("iterations", "Number of iterations").
@@ -40,7 +42,8 @@ func main(){
 	start := time.Now()
 
 	//Open output file or stdout and create buffer
-	file := os.Stdout
+	var file *os.File
+	var writer *bufio.Writer
 	if *arg_output != "" {
 		var err error
 		file, err = os.Create(*arg_output)
@@ -48,9 +51,10 @@ func main(){
 			panic(err)
 		}
 		defer file.Close()
+		writer := bufio.NewWriter(file)
+		defer writer.Flush()
+		outputting = true
 	}
-	writer := bufio.NewWriter(file)
-	defer writer.Flush()
 
 	//Get the real average, and save it to the output
 	realAvg := Sample(ALL)
@@ -80,7 +84,6 @@ func main(){
 	msg("")
 
 	msg("  --- Error Digest ---")
-	msg("Real          : %f avg", realAvg.Value())
 	msg("Convenience   : %f%% error", math.Abs(1 - convenienceAvg.Value() / realAvg.Value()) * 100)
 	msg("Simple random : %f%% error", errorAverages[SIMPLE_RANDOM].Value() * 100)
 	msg("Stratified row: %f%% error", errorAverages[STRATIFIED_ROW].Value() * 100)
@@ -97,7 +100,10 @@ func msgRaw(msg string, a ...interface{}){
 }
 
 func writeRecord(writer *bufio.Writer, strat Strategy, average float64) (int, error){
-	return writer.WriteString(fmt.Sprintf("%d,%f\n", int(strat), average))
+	if(outputting) {
+		return writer.WriteString(fmt.Sprintf("%d,%f\n", int(strat), average))
+	}
+	return 0, nil
 }
 
 
