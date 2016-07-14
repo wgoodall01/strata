@@ -29,18 +29,6 @@ func main(){
 		String()
 	kingpin.Parse()
 
-
-	//Sampling method average declarations
-	errorAverages := map[Strategy]*Average{
-		SIMPLE_RANDOM: &Average{},
-		CONVENIENCE: &Average{},
-		STRATIFIED_ROW: &Average{},
-		STRATIFIED_COL: &Average{},
-	}
-
-	msgRaw("Taking %d samples... ", *arg_iterations)
-	start := time.Now()
-
 	//Open output file or stdout and create buffer
 	var file *os.File
 	var writer *bufio.Writer
@@ -51,9 +39,20 @@ func main(){
 			panic(err)
 		}
 		defer file.Close()
-		writer := bufio.NewWriter(file)
+		writer = bufio.NewWriter(file)
 		defer writer.Flush()
 		outputting = true
+	}
+
+	msgRaw("Taking %d samples... ", *arg_iterations)
+	start := time.Now()
+
+	//Sampling method average declarations
+	errorAverages := map[Strategy]*Average{
+		SIMPLE_RANDOM: &Average{},
+		CONVENIENCE: &Average{},
+		STRATIFIED_ROW: &Average{},
+		STRATIFIED_COL: &Average{},
 	}
 
 	//Get the real average, and save it to the output
