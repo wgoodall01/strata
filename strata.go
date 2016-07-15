@@ -55,6 +55,13 @@ func main(){
 		STRATIFIED_COL: &Average{},
 	}
 
+	sampleAverages := map[Strategy]*Average{
+		SIMPLE_RANDOM: &Average{},
+		CONVENIENCE: &Average{},
+		STRATIFIED_ROW: &Average{},
+		STRATIFIED_COL: &Average{},
+	}
+
 	//Get the real average, and save it to the output
 	realAvg := Sample(ALL)
 	writeRecord(writer, ALL, realAvg.Value())
@@ -67,6 +74,9 @@ func main(){
 			//Get sample avg
 			sampleAvg := Sample(strat)
 
+			//Add the sample avg to the sample average
+			sampleAverages[strat].Merge(sampleAvg)
+
 			//Calculate margin of error
 			errorMargin := 1.0 - realAvg.Value() / sampleAvg.Value()
 
@@ -74,7 +84,7 @@ func main(){
 			absError := math.Abs(errorMargin)
 			errorAverages[strat].Include(absError)
 
-			//Add the absolute value of the error to the output buffer.
+			//Add the absolute value of the average to the output buffer.
 			writeRecord(writer, strat, sampleAvg.Value())
 		}
 	}
@@ -82,11 +92,12 @@ func main(){
 	msg("[DONE in %dms]", time.Since(start).Nanoseconds() / 1000000);
 	msg("")
 
-	msg("  --- Error Digest ---")
-	msg("Convenience   : %f%% error", math.Abs(1 - convenienceAvg.Value() / realAvg.Value()) * 100)
-	msg("Simple random : %f%% error", errorAverages[SIMPLE_RANDOM].Value() * 100)
-	msg("Stratified row: %f%% error", errorAverages[STRATIFIED_ROW].Value() * 100)
-	msg("Stratified col: %f%% error", errorAverages[STRATIFIED_COL].Value() * 100)
+	msg("  --- Result ---")
+	msg("Population    : %f avg", realAvg.Value())
+	msg("Convenience   : %f avg : %f%% error", convenienceAvg.Value(), math.Abs(1 - convenienceAvg.Value() / realAvg.Value()) * 100)
+	msg("Simple random : %f avg : %f%% error", sampleAverages[SIMPLE_RANDOM].Value(), errorAverages[SIMPLE_RANDOM].Value() * 100)
+	msg("Stratified row: %f avg : %f%% error", sampleAverages[STRATIFIED_ROW].Value(), errorAverages[STRATIFIED_ROW].Value() * 100)
+	msg("Stratified col: %f avg : %f%% error", sampleAverages[STRATIFIED_COL].Value(), errorAverages[STRATIFIED_COL].Value() * 100)
 }
 
 func msg(msg string, a ...interface{}){
